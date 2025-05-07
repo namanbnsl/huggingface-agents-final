@@ -11,6 +11,12 @@ from smolagents import (
 from google import genai
 from google.genai import types
 
+# Have to install using pip in the environment. Update requirements.txt
+from langchain.document_loaders import CSVLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain.vectorstores import Chroma
+
 client = genai.Client(api_key=os.environ["LLM_API_KEY"])
 
 model = LiteLLMModel(
@@ -68,10 +74,37 @@ agent = CodeAgent(
     model=model,
 )
 
+embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+
+def answer_csv_questions(question: str, file_path: str = None):
+    loader = CSVLoader(file_path=file_path, csv_args={'delimiter': ','})
+    documents = loader.load()
+
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+    chunks = text_splitter.split_documents(documents)
+
+    vectorstore = Chroma.from_documents(chunks, embeddings)
+
+    retrieved_docs = vectorstore.similarity_search(query, k=3)
+    agent_input_docs = f"\n\n===== Document {str(i)} =====\n" + doc.page_content for i, doc in enumerate(retrieved_docs)]
+
+    answer = agent.run(f"
+        Answer the question based on the context of the CSV file given to you.
+
+        Context: {agent_input_docs}
+
+        Question: {question}
+    ")
+
+
+    return answer
 
 def call_agent(question: str, file_path: str = None):
     if file_path and file_path.strip():
         print(f"Recieved {file_path} as input.")
+
+        if ".csv" in file_path:
+            return answer_csv_questions(question, file_path)
 
         file = client.files.upload(file=file_path)
 
