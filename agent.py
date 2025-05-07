@@ -11,6 +11,16 @@ from smolagents import (
 from google import genai
 from google.genai import types
 
+from scripts.text_web_browser import (
+    ArchiveSearchTool,
+    FinderTool,
+    FindNextTool,
+    PageDownTool,
+    PageUpTool,
+    SimpleTextBrowser,
+    VisitTool,
+)
+
 # Have to install using pip in the environment. Update requirements.txt
 from langchain.document_loaders import CSVLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -18,6 +28,20 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.vectorstores import Chroma
 
 client = genai.Client(api_key=os.environ["LLM_API_KEY"])
+
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0"
+
+BROWSER_CONFIG = {
+    "viewport_size": 1024 * 5,
+    "downloads_folder": "downloads_folder",
+    "request_kwargs": {
+        "headers": {"User-Agent": user_agent},
+        "timeout": 300,
+    },
+    "serpapi_key": os.getenv("SERPAPI_API_KEY"),
+}
+
+os.makedirs(f"./{BROWSER_CONFIG['downloads_folder']}", exist_ok=True)
 
 model = LiteLLMModel(
     model_id="gemini/gemini-2.0-flash-lite",
@@ -78,6 +102,12 @@ agent = CodeAgent(
         VisitWebpageTool(),
         WikipediaSearchTool(),
         answer_video_questions,
+        VisitTool(browser),
+        PageUpTool(browser),
+        PageDownTool(browser),
+        FinderTool(browser),
+        FindNextTool(browser),
+        ArchiveSearchTool(browser),
     ],
     model=model,
 )
