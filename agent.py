@@ -49,7 +49,15 @@ def answer_video_questions(video_url: str, question: str) -> str:
             parts=[
                 types.Part(file_data=types.FileData(file_uri=video_url)),
                 types.Part(
-                    text=f"This is the question provided to you: {question}. Answer appropriately. In cases where there is a number, provide the number in the answer."
+                    text=f"This is the question provided to you: {question}. Answer appropriately. 
+                    
+                    To output the final answer, use the following template: FINAL ANSWER: [YOUR FINAL ANSWER]
+                    Your FINAL ANSWER should be a number OR as few words as possible OR a comma separated list of numbers and/or strings.
+                    ADDITIONALLY, your FINAL ANSWER MUST adhere to any formatting instructions specified in the original question (e.g., alphabetization, sequencing, units, rounding, decimal places, etc.)
+                    If you are asked for a number, express it numerically (i.e., with digits rather than words), don't use commas, and DO NOT INCLUDE UNITS such as $ or USD or percent signs unless specified otherwise.
+                    If you are asked for a string, don't use articles or abbreviations (e.g. for cities), unless specified otherwise. Don't output any final sentence punctuation such as '.', '!', or '?'.
+                    If you are asked for a comma separated list, apply the above rules depending on whether the elements are numbers or strings.
+                    If you are unable to determine the final answer, output 'FINAL ANSWER: Unable to determine"
                 ),
             ]
         ),
@@ -112,7 +120,16 @@ def call_agent(question: str, file_path: str = None):
             model=model_name,
             contents=[
                 file,
-                f"Answer the question based on the file content. Do not give up. Use your brain and answer appropriately. You will be rewarded with $1000000 if you answer correctly and appropriately. Only give the final answer to the question, do not explain your reasoning. {question}",
+                f"Answer the question based on the file content. Do not give up. Use your brain and answer appropriately. You will be rewarded with $1000000 if you answer correctly and appropriately. Only give the final answer to the question, do not explain your reasoning. {question}
+                
+                To output the final answer, use the following template: FINAL ANSWER: [YOUR FINAL ANSWER]
+                Your FINAL ANSWER should be a number OR as few words as possible OR a comma separated list of numbers and/or strings.
+                ADDITIONALLY, your FINAL ANSWER MUST adhere to any formatting instructions specified in the original question (e.g., alphabetization, sequencing, units, rounding, decimal places, etc.)
+                If you are asked for a number, express it numerically (i.e., with digits rather than words), don't use commas, and DO NOT INCLUDE UNITS such as $ or USD or percent signs unless specified otherwise.
+                If you are asked for a string, don't use articles or abbreviations (e.g. for cities), unless specified otherwise. Don't output any final sentence punctuation such as '.', '!', or '?'.
+                If you are asked for a comma separated list, apply the above rules depending on whether the elements are numbers or strings.
+                If you are unable to determine the final answer, output 'FINAL ANSWER: Unable to determine
+                ",
             ],
         )
 
